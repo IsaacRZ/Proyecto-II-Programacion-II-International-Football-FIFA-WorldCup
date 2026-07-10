@@ -29,19 +29,6 @@ class ProcesadorEDA:
     def filas(self) -> int:
         return self._filas
 
-    """
-    # En duda si dejarlo o no
-    # Vista de primeros 15 elementos
-    def primerosDatos(self):
-        pd.set_option('display.max_rows', self.__columnas)
-        return print(self._df.head(n = 15))
-
-    # Vista de últimos 15 elementos
-    def ultimososDatos(self):
-        pd.set_option('display.max_rows', self.__columnas)
-        return print(self._df.tail(n = 15))
-    """
-
     # Matriz de Correlación
     def correlacion(self):
         filtro_numerico = self._df.select_dtypes(['number']) # Se filtran solo los datos numéricos
