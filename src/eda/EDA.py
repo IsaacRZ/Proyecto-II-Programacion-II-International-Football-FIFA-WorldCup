@@ -15,7 +15,15 @@ class ProcesadorEDA:
         self._gestor = gestor
         self._df = gestor.df
         self._filas = self._df.shape[0]
+<<<<<<< HEAD
         self._columnas = self._df.shape[1]
+=======
+<<<<<<< HEAD
+        self._columnas = self._df.shape[1]
+=======
+        self.columnas = self._df.shape[1]
+>>>>>>> b536fcee5bec1a90f83824cbe38f54a2391b3cdb
+>>>>>>> e8464cfbf4a35e6ac42802c14d10b0fd60b6b153
 
     @property
     def df(self) -> pd.DataFrame:
@@ -29,6 +37,13 @@ class ProcesadorEDA:
     def filas(self) -> int:
         return self._filas
 
+<<<<<<< HEAD
+=======
+<<<<<<< HEAD
+=======
+    """
+    # En duda si dejarlo o no
+>>>>>>> e8464cfbf4a35e6ac42802c14d10b0fd60b6b153
     # Vista de primeros 15 elementos
     def primerosDatos(self):
         pd.set_option('display.max_rows', self._columnas)
@@ -40,6 +55,7 @@ class ProcesadorEDA:
         return print(self._df.tail(n = 15))
 
 
+>>>>>>> b536fcee5bec1a90f83824cbe38f54a2391b3cdb
     # Matriz de Correlación
     def correlacion(self):
         filtro_numerico = self._df.select_dtypes(['number']) # Se filtran solo los datos numéricos

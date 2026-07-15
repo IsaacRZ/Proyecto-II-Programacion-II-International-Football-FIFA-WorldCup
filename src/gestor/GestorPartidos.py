@@ -69,7 +69,7 @@ class GestorPartidos:
         idmax = partidos_validos['total_score'].idxmax()
         return partidos_validos.loc[idmax].to_dict()
     
-    def get_por_equipo(self, equipo: str) -> int:
+    def get_goles_por_equipo(self, equipo: str) -> int:
         partidos =  self.get_por_equipo(equipo)
 
         partidos_local = partidos[partidos['home_team'] == equipo]
