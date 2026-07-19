@@ -80,8 +80,3 @@ class GestorPartidos:
 
         total_goles = goles_local + goles_visita
         return int(total_goles)
-    
-    
-
-        
-
