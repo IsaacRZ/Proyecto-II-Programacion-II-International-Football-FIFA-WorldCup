@@ -247,7 +247,7 @@ class ProcesadorEDA:
 
         # Se filtra el dataset para buscar el último partido disputado (razón por la que se excluye 2026)
         finales = sede.loc[indices_finales].copy()
-        finales = finales[finales['Año'] != 2026]
+        #finales = finales[finales['Año'] != 2026]
 
         # Función para obtener el campeón según los goles del último partido, gracias a finales
         def obtener_campeon(fila):

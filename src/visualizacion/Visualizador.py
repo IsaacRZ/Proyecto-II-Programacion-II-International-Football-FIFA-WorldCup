@@ -2,31 +2,32 @@
 import matplotlib.pyplot as plt
 import pandas as pd
 import numpy as np
-import geopandas as gpd
-from src.eda import EDA
+
+from src.eda.EDA import ProcesadorEDA
+from src.gestor.GestorPartidos import GestorPartidos
 
 class Visualizador:
-    def __init__(self, DF):
-        self._DF = DF
-        self._filas = self._DF.df.shape[0]
-        self._columnas = self._DF.df.shape[1]
+    def __init__(self, gestor: GestorPartidos):
+        self._gestor = gestor
+        self._procesador = ProcesadorEDA(gestor)
+        self._filas = self._procesador.filas
+        self._columnas = self._procesador.columnas
 
     @property
-    def DF(self):
-        return self._DF
+    def gestor(self) -> GestorPartidos:
+        return self._gestor
 
     @property
-    def columnas(self):
+    def columnas(self) -> int:
         return self._columnas
 
     @property
-    def filas(self):
+    def filas(self) -> int:
         return self._filas
 
     # Gráfico de tornado (o mariposa) para ver la diferencia de gol
     def grafico_diferencia_goles(self):
-        invocador = EDA.ProcesadorEDA(self._DF)
-        tabla_goles = invocador.diferencia_goles().fillna(0)
+        tabla_goles = self._procesador.diferencia_goles().fillna(0)
         # Invocador sirve para llamar a la clase ProcesadorEDA
 
         top_negativo = tabla_goles.sort_values(by='Diferencia Goles', ascending=False).tail(5)
@@ -70,12 +71,12 @@ class Visualizador:
         ax.spines[['top', 'right', 'left']].set_visible(False)
         ax.tick_params(left=False)
 
-        return plt.show()
+        plt.close(fig)
+        return fig
 
     # Línea del tiempo que muestra los goles marcados en cada edición del mundial
     def goles_por_mundial(self):
-        invocador = EDA.ProcesadorEDA(self._DF)
-        goles_mundiales = invocador.goles_mundial().sort_values(by = 'Año', ascending = True)
+        goles_mundiales = self._procesador.goles_por_mundial().sort_values(by='Año', ascending=True)
 
         valores_x = goles_mundiales['Año']
         valores_y = goles_mundiales['Goles Anotados']
@@ -110,13 +111,16 @@ class Visualizador:
         # Se amplía el rango de límite de altura
 
         ax.grid(True, linestyle='--', alpha=0.5)
-        return plt.show()
 
+        ax.spines[['top', 'right', 'left']].set_visible(False)
+        ax.tick_params(left=False)
+
+        plt.close(fig)
+        return fig
 
     # Gráfico de telaraña con las mejores selecciones en mundiales históricamente
     def mejores_cinco_selecciones(self):
-        invocador = EDA.ProcesadorEDA(self._DF)
-        ranking_completo = invocador.ranking_mundial()
+        ranking_completo = self._procesador.ranking_mundial()
         top5 = ranking_completo.head(5).copy()
 
         columnas_radar = ['Cantidad de Victorias', 'Cantidad de Empates', 'Cantidad de Derrotas','Goles Anotados','Goles Recibidos', 'Diferencia Goles','Puntos']
@@ -158,12 +162,12 @@ class Visualizador:
         ax.grid(color='#AAAAAA', linestyle='--', linewidth=0.5)
         # Estilo de las líneas de la telaraña
 
-        return plt.show()
+        plt.close(fig)
+        return fig
 
     # Sedes campeonas vs campeones no sedes
     def campeon_sede_otro(self):
-        invocador = EDA.ProcesadorEDA(self._DF)
-        sedes_campeones = invocador.veces_sede()
+        sedes_campeones = self._procesador.veces_sede()
 
         coincide_sede = 0
         otro_campeon = 0
@@ -216,17 +220,20 @@ class Visualizador:
         ax.spines['right'].set_visible(False)
         ax.grid(axis='y', linestyle='--', alpha=0.4)
 
-        return plt.show()
+        ax.spines[['top', 'right', 'left']].set_visible(False)
+        ax.tick_params(left=False)
+
+        plt.close(fig)
+        return fig
 
     # Países con mas subcampeonatos
     def subcampeones(self):
-        invocador = EDA.ProcesadorEDA(self._DF)
-        sede = invocador.df
+        sede = self._procesador.df
 
         sede['Año'] = sede['date'].dt.year
         indices_finales = sede.groupby('Año')['date'].idxmax()
         finales = sede.loc[indices_finales].copy()
-        finales = finales[finales['Año'] != 2026]
+        #finales = finales[finales['Año'] != 2026]
         # Se almacenan las finales de los años excepto 2026 que aún no transcurre
 
         def obtener_subcampeon(fila):
@@ -261,4 +268,8 @@ class Visualizador:
         ax.spines['right'].set_visible(False)
         ax.grid(axis='x', linestyle='--', alpha=0.3)
 
-        return plt.show()
+        ax.spines[['top', 'right', 'left']].set_visible(False)
+        ax.tick_params(left=False)
+
+        plt.close(fig)
+        return fig
