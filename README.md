@@ -1,35 +1,163 @@
-# Proyecto-II Programacion II International Football FIFA WorldCup
+# Proyecto-II Programación II — International Football FIFA World Cup
 
 ### Integrantes:
-###  Isaac Rodriguez Zuñiga
-###  Sebastian Calvo
+### Isaac Rodríguez Zúñiga
+### Sebastián Calvo Solano
+
+### Colegio Universitario de Cartago — Programación II
+
+---
 
 # Descripción General del Proyecto
 
-### Dataset
+Este proyecto realiza un análisis exploratorio de datos (EDA) sobre los partidos
+históricos de la Copa Mundial de la FIFA, aplicando los conceptos de
+**clases y objetos** vistos en el curso. El proyecto está dividido en cuatro
+capas independientes, cada una con una única responsabilidad:
 
-El dataset utilizado es: https://github.com/martj42/international_results el cual se filtra por la columna 'tournament' para copiar en un nuevo dataframe unicamente los partidos con la descripción 'Fifa World Cup'
+1. **Ingesta** (`CargadorDatos`) — descarga, filtra, enriquece, valida y
+   persiste los datos crudos.
+2. **Gestión** (`GestorPartidos`) — expone consultas de solo lectura sobre
+   partidos individuales, equipos, años y sedes.
+3. **EDA** (`ProcesadorEDA`) — realiza análisis agregado sobre todo el
+   dataset: rankings, totales por equipo, comparativas entre selecciones.
+4. **Visualización** (`Visualizador`) — genera gráficos que traducen los
+   resultados del EDA en historias visuales.
 
-### Contenido del dataset: Columnas - Variables importantes
-Columnas y sus tipos de datos:
+---
+
+# Dataset
+
+El dataset utilizado es: https://github.com/martj42/international_results
+
+Se filtra por la columna `tournament`, quedándose únicamente con los partidos
+cuya descripción sea `"FIFA World Cup"`. El archivo original se descarga desde:
+
+```
+https://raw.githubusercontent.com/martj42/international_results/master/results.csv
+```
+
+### Contenido del dataset filtrado — Columnas y variables
 
 | # | Column | Non-Null Count | Dtype | Descripción |
 | --- | --- | --- | --- | --- |
-| - | id | 119 non-null | bool | id original del raw_results.csv |
-| 0 | date | 119 non-null | datetime64[us] | fecha del partido (YYYY-MM-DD) |
-| 1 | home_team | 119 non-null | str | equipo local |
-| 2 | away_team | 119 non-null | str | equipo visitante |
-| 3 | home_score | 118 non-null | float64 | goles del equipo local |
-| 4 | away_score | 118 non-null | float64 | goles del equipo visitante |
-| 5 | tournament | 119 non-null | str | torneo (filtrar por "FIFA World Cup") |
-| 6 | city | 119 non-null | str | ciudad sede del partido |
-| 7 | country | 119 non-null | str | país sede del partido |
-| 8 | neutral | 119 non-null | bool | indica si el partido se jugó en cancha neutral (True/False) |
-| 9 | clave_partido | 119 non-null | str | Clave especifica del partido (date_hometeam_awayteam) |
+| - | id | *( )* | int64 | Índice original de la fila en `raw_results.csv`, usado para trazabilidad al archivo crudo |
+| 0 | date | *( )* | datetime64[ns] | Fecha del partido (`YYYY-MM-DD`) |
+| 1 | home_team | *( )* | str | Equipo local |
+| 2 | away_team | *( )* | str | Equipo visitante |
+| 3 | home_score | *( , con nulos)* | float64 | Goles del equipo local |
+| 4 | away_score | *( , con nulos)* | float64 | Goles del equipo visitante |
+| 5 | tournament | *( )* | str | Torneo (filtrado por `"FIFA World Cup"`) |
+| 6 | city | *( )* | str | Ciudad sede del partido |
+| 7 | country | *( )* | str | País sede del partido |
+| 8 | neutral | *( )* | bool | Indica si el partido se jugó en cancha neutral (`True`/`False`) |
+| 9 | clave_partido | *( )* | str | Clave estable del partido (`fecha_equipoLocal_equipoVisitante`), usada como identificador de negocio independiente del orden del archivo |
 
-# Conda 
+---
 
-1. Crear: ´conda env create -f env.yml´
-2. Activar: ´conda activate FifaWc´ 
-3. Desactivar ´conda deactivate´
+# Arquitectura del Proyecto
 
+```
+src/
+├── ingesta/
+│   └── CargadorDatos.py      # Descarga, filtra, enriquece, valida, persiste
+├── gestor/
+│   └── GestorPartidos.py     # Consultas de solo lectura (un partido, un equipo, un año...)
+├── eda/
+│   └── EDA.py                 # ProcesadorEDA: rankings y agregados sobre todo el dataset
+├── visualizacion/
+│   └── Visualizador.py        # Gráficos que consumen ProcesadorEDA
+└── helpers/                   # Utilidades genéricas reutilizables
+
+data/
+├── raw/                       # CSV crudo descargado + procesado, según especificación del proyecto
+└── processed/                 # Reservado para uso futuro
+
+notebooks/
+├── 01_Visualizador.ipynb      # Narrativa visual completa con Visualizador
+├── 02_EDA.ipynb               # Exploración con ProcesadorEDA
+├── 03_CheckGestor.ipynb       # Pruebas de GestorPartidos
+└── 04_CleanRaw.ipynb          # Utilidades de limpieza de datos
+
+dashboard/                      # Dashboard de Streamlit (ver sección de Puntos Extra)
+docs/                           # Documentación del proyecto (enunciado, etc.)
+```
+
+### Flujo de dependencias
+
+```
+CargadorDatos  →  GestorPartidos  →  ProcesadorEDA  →  Visualizador
+   (ingesta)         (consulta)         (análisis)        (gráficos)
+```
+
+Cada capa confía en que la anterior ya validó y dejó los datos en el formato
+esperado — ninguna capa revalida el trabajo de la capa previa, siguiendo el
+principio de responsabilidad única.
+
+---
+
+# Instalación del entorno (Conda)
+
+1. Crear el entorno: `conda env create -f env.yml`
+2. Activar el entorno: `conda activate FifaWC`
+3. Desactivar el entorno: `conda deactivate`
+
+Para sincronizar el entorno si `env.yml` cambia después de la creación inicial:
+```bash
+conda env update --name FifaWC --file env.yml --prune
+```
+
+---
+
+# Cómo ejecutar el proyecto
+
+Todos los comandos se ejecutan desde la **raíz del proyecto** (donde vive `env.yml`):
+
+```bash
+# Prueba del pipeline de ingesta
+python -m src.ingesta.CargadorDatos
+
+# Prueba del EDA
+python -m src.eda.prueba
+
+# Prueba de visualización
+python -m src.visualizacion.pruebav
+```
+
+Alternativamente, todo el flujo puede explorarse de forma interactiva a través
+de los notebooks en `notebooks/`, en el orden numérico sugerido por sus nombres.
+
+---
+
+# Clases principales
+
+### `CargadorDatos`
+Responsable de: descargar el CSV (con cache local para evitar descargas
+repetidas), filtrar los partidos de Copa Mundial, enriquecer el dataset
+(conversión de fechas, generación de `clave_partido`), validar la integridad
+mínima de los datos, y persistir tanto la versión cruda como la procesada.
+
+### `GestorPartidos`
+Expone métodos de solo lectura: `get_partido`, `get_partido_por_id`,
+`get_por_equipo`, `get_por_anio`, `get_por_sede`, `ventaja_local`,
+`promedio_goles_por_partido`, `partido_mas_goles_por_partido`,
+`get_goles_por_equipo`, entre otros.
+
+### `ProcesadorEDA`
+Genera tablas de análisis agregado: `goles_favor`, `goles_contra`,
+`diferencia_goles`, `victorias`, `derrotas`, `empates`, `mas_gol_mundial`,
+`menos_gol_mundial`, `veces_sede`, `ranking_mundial`, `correlacion`,
+`descripcion`, `outliers`.
+
+### `Visualizador`
+Traduce los resultados de `ProcesadorEDA` en gráficos: diferencia de goles
+(tornado), evolución de goles por edición (línea de tiempo), top 5 histórico
+(radar), sede vs. campeón (barras comparativas), y subcampeonatos (barras
+horizontales).
+
+---
+
+# Fuente de datos
+
+Dataset original: *International football results from 1872 to present*,
+de Mart Jürisoo — https://github.com/martj42/international_results
